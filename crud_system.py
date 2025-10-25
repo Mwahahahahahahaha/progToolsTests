@@ -1,7 +1,6 @@
 import json
 import re
 import os
-import phonenumbers # Install: pip install phonenumbers
 
 def clear_console():
     if os.name == 'nt':
@@ -13,11 +12,7 @@ def pause():
     input("Press Enter to continue...")
 
 def is_valid_number(number):
-    try:
-        parsed_number = phonenumbers.parse(number, "PH")
-        return phonenumbers.is_valid_number(parsed_number)
-    except phonenumbers.NumberParseException:
-        return False
+    return bool(re.match(r"^(09|\+639)\d{9}$", number))
 
 def is_valid_name(name):
     return bool(re.match(r"^[a-zA-Z\s'-]+$", name)) and len(name) >= 2
@@ -26,7 +21,7 @@ def is_valid_address(address):
     return bool(re.match(r'^[a-zA-Z0-9\s,.\'-]+$', address)) and len(address) >= 2
 
 def format_phone_number(number):
-    return number.replace(" ", "").replace("-", "")
+    return number.replace(" ", "").replace("-", "").replace("+63", "0")
 
 class PhoneBookRecord:
     def __init__(self, id, name, number, address):
