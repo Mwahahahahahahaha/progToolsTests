@@ -183,7 +183,6 @@ def main():
                         print(record)
                     elif record is None:
                         print("Record not found")
-                    pause()
                     continue
                 case "3":
                     clear_console()
