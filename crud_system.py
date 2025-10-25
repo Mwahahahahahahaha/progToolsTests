@@ -1,7 +1,7 @@
 import json
 import re
 import os
-import phonenumbers # pip install phonenumbers
+import phonenumbers # Install: pip install phonenumbers
 
 def clear_console():
     if os.name == 'nt':
@@ -55,7 +55,7 @@ class FileIO:
         self.file_name = file_name
         if not os.path.exists(self.file_name):
             with open(self.file_name, 'w') as f:
-                json.dump([], f)
+                json.dump([], f, indent=4)
 
     def load(self):
         try:
@@ -70,7 +70,7 @@ class FileIO:
     def save(self, data):
         try:
             with open(self.file_name, 'w') as f:
-                json.dump([item.to_dict() for item in data], f)
+                json.dump([item.to_dict() for item in data], f, indent=4)
         except IOError as e:
             print(f"Error saving data: {e}")
 
@@ -82,7 +82,7 @@ class DataManager:
     def populate(self, data):
         global highest_id
         self.record_list = data
-        highest_id = max(log.id for log in self.record_list) if self.record_list else 0
+        self.highest_id = max(log.id for log in self.record_list) if self.record_list else 0
 
     def add_record(self, name, number, address):
         record = PhoneBookRecord(self.highest_id + 1, name, number, address)
@@ -120,7 +120,8 @@ def main():
                 field = "number"
             case _:
                 print("Invalid choice")
-                return None
+                pause()
+                return False
 
         value = input(f"Enter {field}: ").strip()
         if field == "id":
@@ -160,8 +161,12 @@ def main():
                         continue
 
                     number = input("Number: ").strip()
-                    if not is_valid_number(number) or data_manager.is_number_duplicate(format_phone_number(number)):
+                    if not is_valid_number(number):
                         print("Invalid number")
+                        pause()
+                        continue
+                    elif data_manager.is_number_duplicate(format_phone_number(number)):
+                        print("Error: The number inputted already exists")
                         pause()
                         continue
 
@@ -181,7 +186,7 @@ def main():
                     print("=============================")
                     if record:
                         print(record)
-                    else:
+                    elif record is None:
                         print("Record not found")
                     pause()
                     continue
@@ -206,13 +211,16 @@ def main():
                                     pause()
                             case "2":
                                 number = input("New Number: ").strip()
-                                is_valid = is_valid_number(number) and not data_manager.is_number_duplicate(number)
-                                if is_valid:
-                                    record.number = format_phone_number(number)
-                                    print("Number updated successfully")
-                                else:
+                                if not is_valid_number(number):
                                     print("Invalid number")
                                     pause()
+                                    continue
+                                elif data_manager.is_number_duplicate(format_phone_number(number)):
+                                    print("Error: The number inputted already exists")
+                                    pause()
+                                    continue
+                                record.number = format_phone_number(number)
+                                print("Number updated successfully")
                             case "3":
                                 address = input("New Address: ").strip()
                                 is_valid = is_valid_address(address)
@@ -222,7 +230,7 @@ def main():
                                 else:
                                     print("Invalid address")
                                     pause()
-                    else:
+                    elif record is None:
                         print("Record not found.")
                         pause()
                         continue
